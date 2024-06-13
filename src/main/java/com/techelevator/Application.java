@@ -26,7 +26,7 @@ public class Application {
                     while (purchasing) {
                         System.out.println("\nPurchase Menu:");
                         System.out.println("Current Balance: $" + vendingMachine.getCurrentBalance());
-                        System.out.println("1. Enter the slot ID of the product");
+                        System.out.println("1. Select Product");
                         System.out.println("2. Feed Money");
                         System.out.println("3. Finish Transaction");
                         System.out.println("4. Cancel Purchase");
@@ -36,6 +36,8 @@ public class Application {
 
                         switch (purchaseChoice) {
                             case "1":
+                                // Display available products before allowing to select
+                                vendingMachine.displayItems();
                                 System.out.print("Enter the slot ID of the product: ");
                                 String slotID = scanner.nextLine();
                                 vendingMachine.selectProduct(slotID);
