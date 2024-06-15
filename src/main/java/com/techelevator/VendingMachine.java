@@ -15,7 +15,7 @@ public class VendingMachine {
         this.inventory = new LinkedHashMap<>();
         this.currentBalance = 0.0;
         this.logger = new Logger();
-        loadInventory();1
+        loadInventory();
     }
 
     private void loadInventory() {
