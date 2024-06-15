@@ -1,23 +1,19 @@
 package com.techelevator;
 
-import org.junit.platform.engine.support.descriptor.FileSystemSource;
-
 import java.io.*;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VendingMachine {
-    private List<Product> inventory;
+    private Map<String, Product> inventory;
     private double currentBalance;
     private static final String INVENTORY_FILE = "vendingmachine.csv";
-    private static final String LOG_FILE = "Log.txt";
-    private static final String SALES_REPORT_FILE = "SalesReport.txt";
+    private Logger logger;
 
     public VendingMachine() {
-        this.inventory = new ArrayList<Product>();
+        this.inventory = new HashMap<>();
         this.currentBalance = 0.0;
+        this.logger = new Logger();
         loadInventory();
     }
 
@@ -31,7 +27,7 @@ public class VendingMachine {
                 double price = Double.parseDouble(parts[2]);
                 String type = parts[3];
                 int quantity = 5; // Initially stocked to maximum
-                inventory.add(new Product(slotId, name, price, quantity, type));
+                inventory.put(slotId, new Product(slotId, name, price, quantity, type));
             }
         } catch (IOException e) {
             System.out.println("Error reading inventory file: " + e.getMessage());
@@ -39,59 +35,63 @@ public class VendingMachine {
     }
 
     public void displayItems() {
-        for (Product product : inventory) {
+        for (Product product : inventory.values()) {
             System.out.println(product.getSlotID() + " | " + product.getName() + " | $" + product.getPrice() + " | " + (product.getQuantity() > 0 ? product.getQuantity() : "SOLD OUT"));
         }
     }
 
     public void feedMoney(double amount) {
+        if (amount <= 0) {
+            System.out.println("Please enter a positive amount.");
+            return;
+        }
         currentBalance += amount;
         System.out.println("Current Money Provided: $" + currentBalance);
     }
 
     public void selectProduct(String slotID) {
-        for (Product product : inventory) {
-            if (product.getSlotID().equalsIgnoreCase(slotID)) {
-                if (product.getQuantity() > 0 && currentBalance >= product.getPrice()) {
-                    product.setQuantity(product.getQuantity() - 1);
-                    currentBalance -= product.getPrice();
-                   //Determines the appropriate message based on product
-                    String soundMessage = "";
-                    switch (product.getType().toLowerCase()) {
-                        case "chip":
-                            soundMessage ="Crunch Crunch, Yum!";
-                            break;
-                        case "candy":
-                            soundMessage ="Munch Munch, Yum!";
-                            break;
-                        case "drink":
-                            soundMessage ="Glug Glug, Yum!";
-                            break;
-                        case "gum":
-                            soundMessage ="Chew Chew, Yum!";
-                            break;
-                        default:
-                            soundMessage = "Yum";
-                            break;
-                    }
-
-                    // Print the dispensing message
-                    System.out.println("Dispensing: " + product.getName() + " | " + product.getType() + ", " + soundMessage);
-                    logTransaction("PURCHASE " + slotID + " $" + product.getPrice());
-                    return;
-                } else if (product.getQuantity() == 0) {
-                    System.out.println("product SOLD OUT.");
-                } else {
-                    System.out.println("Insufficient funds.");
-                }
-            }
+        Product product = inventory.get(slotID.toUpperCase());
+        if (product == null) {
+            System.out.println("Invalid product selection.");
+            return;
         }
-        System.out.println("Invalid product selection.");
+
+        if (product.getQuantity() == 0) {
+            System.out.println("Product SOLD OUT.");
+            return;
+        }
+
+        if (currentBalance < product.getPrice()) {
+            System.out.println("Insufficient funds.");
+            return;
+        }
+
+        product.setQuantity(product.getQuantity() - 1);
+        currentBalance -= product.getPrice();
+
+        String soundMessage = getSoundMessage(product.getType());
+        System.out.println("Dispensing: " + product.getName() + " | " + product.getType() + ", " + soundMessage);
+        logger.logTransaction(new Transaction("PURCHASE", slotID, product.getPrice()));
+    }
+
+    private String getSoundMessage(String type) {
+        switch (type.toLowerCase()) {
+            case "chip":
+                return "Crunch Crunch, Yum!";
+            case "candy":
+                return "Munch Munch, Yum!";
+            case "drink":
+                return "Glug Glug, Yum!";
+            case "gum":
+                return "Chew Chew, Yum!";
+            default:
+                return "Yum";
+        }
     }
 
     public void finishTransaction() {
         System.out.println("Returning change: $" + currentBalance);
-        logTransaction("CHANGE $" + currentBalance);
+        logger.logTransaction(new Transaction("CHANGE", "", currentBalance));
         currentBalance = 0.0;
     }
 
@@ -99,27 +99,11 @@ public class VendingMachine {
         return currentBalance;
     }
 
-    private void logTransaction(String logEntry) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(LOG_FILE, true))) {
-            bw.write(new Date() + " " + logEntry + "\n");
-        } catch (IOException e) {
-            System.out.println("Error logging transaction: " + e.getMessage());
-        }
+    public Map<String, Product> getInventory() {
+        return inventory;
     }
 
     public void generateSalesReport() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(SALES_REPORT_FILE))) {
-            double totalSales = 0.0;
-            for (Product product : inventory) {
-                int sold = 5 - product.getQuantity(); //Assuming max quantity is 5
-                double sales = sold + product.getPrice();
-                bw.write(product.getName() + "|" + sold + "\n");
-                totalSales += sales;
-            }
-            bw.write("\n**TOTAL SALES** $" + totalSales + "\n");
-            } catch (IOException e) {
-            System.out.println("Error writing sales report: " + e.getMessage());
-        }
+        logger.generateSalesReport(inventory);
     }
-
 }
