@@ -2,6 +2,7 @@ package com.techelevator;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class VendingMachine {
@@ -11,10 +12,10 @@ public class VendingMachine {
     private Logger logger;
 
     public VendingMachine() {
-        this.inventory = new HashMap<>();
+        this.inventory = new LinkedHashMap<>();
         this.currentBalance = 0.0;
         this.logger = new Logger();
-        loadInventory();
+        loadInventory();1
     }
 
     private void loadInventory() {
