@@ -3,6 +3,7 @@ package com.techelevator;
 import java.util.Scanner;
 
 public class Application {
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         VendingMachine vendingMachine = new VendingMachine();
@@ -11,8 +12,7 @@ public class Application {
             System.out.println("\nVending Machine Menu:");
             System.out.println("1. Display Items");
             System.out.println("2. Purchase Item");
-            System.out.println("3. Generate Sales Report");
-            System.out.println("4. Exit");
+            System.out.println("3. Exit");
 
             System.out.print("Select an option: ");
             String choice = scanner.nextLine();
@@ -36,7 +36,6 @@ public class Application {
 
                         switch (purchaseChoice) {
                             case "1":
-                                // Display available products before allowing to select
                                 vendingMachine.displayItems();
                                 System.out.print("Enter the slot ID of the product: ");
                                 String slotID = scanner.nextLine();
@@ -65,11 +64,9 @@ public class Application {
                     }
                     break;
                 case "3":
+                    System.out.println("Generating sales report and exiting...");
                     vendingMachine.generateSalesReport();
-                    System.out.println("Sales report generated.");
-                    break;
-                case "4":
-                    System.out.println("Exiting. Have a nice day!");
+                    System.out.println("Sales report generated. Have a nice day!");
                     scanner.close();
                     return;
                 default:
