@@ -64,9 +64,8 @@ public class Application {
                     }
                     break;
                 case "3":
-                    System.out.println("Generating sales report and exiting...");
                     vendingMachine.generateSalesReport();
-                    System.out.println("Sales report generated. Have a nice day!");
+                    System.out.println("Exiting. Have a nice day!");
                     scanner.close();
                     return;
                 default:
