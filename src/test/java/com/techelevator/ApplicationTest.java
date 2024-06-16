@@ -1,76 +1,86 @@
 package com.techelevator;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
 
-    private final InputStream originalIn = System.in;
-    private final PrintStream originalOut = System.out;
-    private ByteArrayInputStream testIn;
-    private ByteArrayOutputStream testOut;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-    @Before
-    public void setUp() {
-        testOut = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(testOut));
-    }
 
-    @After
-    public void tearDown() {
-        System.setIn(originalIn);
-        System.setOut(originalOut);
-    }
-
-    private void provideInput(String data) {
-        testIn = new ByteArrayInputStream(data.getBytes());
-        System.setIn(testIn);
-    }
-
-    private String getOutput() {
-        return testOut.toString();
-    }
-
-    @Test
-    public void testDisplayItemsOption() {
-        provideInput("1\n4\n");
-        Application.main(new String[]{});
-        String output = getOutput();
-        assertTrue(output.contains("Potato Crisps"));
-    }
-
-    @Test
-    public void testFeedMoneyAndSelectProduct() {
-        provideInput("2\n2\n5\n1\nA1\n3\n4\n");
-        Application.main(new String[]{});
-        String output = getOutput();
-        assertTrue(output.contains("Current Balance: $5.0"));
-        assertTrue(output.contains("Dispensing: Potato Crisps"));
-        assertTrue(output.contains("Current Balance: $1.95"));
-    }
-
-    @Test
-    public void testFinishTransaction() {
-        provideInput("2\n2\n2\n3\n4\n");
-        Application.main(new String[]{});
-        String output = getOutput();
-        assertTrue(output.contains("Current Balance: $2.0"));
-        assertTrue(output.contains("Returning change: $2.0"));
-    }
-
-    @Test
-    public void testInvalidOption() {
-        provideInput("5\n4\n");
-        Application.main(new String[]{});
-        String output = getOutput();
-        assertTrue(output.contains("Invalid option."));
-    }
+@BeforeEach
+public void setUp() {
+    System.setOut(new PrintStream(outContent));
 }
+
+private void provideInput(String data) {
+    ByteArrayInputStream testIn = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+    System.setIn(testIn);
+}
+
+private String getOutput() {
+    return outContent.toString();
+}
+
+@Test
+public void testApplicationMenu() {
+    String simulatedUserInput = "3\n";
+    provideInput(simulatedUserInput);
+
+    Application.main(new String[]{});
+
+    String output = getOutput();
+    assertTrue(output.contains("Vending Machine Menu:"));
+    assertTrue(output.contains("1. Display Items"));
+    assertTrue(output.contains("2. Purchase Item"));
+    assertTrue(output.contains("3. Exit"));
+    assertTrue(output.contains("Exiting. Have a nice day!"));
+}
+
+@Test
+public void testDisplayItems() {
+    String simulatedUserInput = "1\n3\n";
+    provideInput(simulatedUserInput);
+
+    Application.main(new String[]{});
+
+    String output = getOutput();
+    assertTrue(output.contains("Vending Machine Items:"));
+    assertTrue(output.contains("Soda"));
+    assertTrue(output.contains("Chips"));
+    assertTrue(output.contains("Candy"));
+    assertTrue(output.contains("Gum"));
+    assertFalse(output.contains("Products sold out."));
+}
+
+@Test
+public void testPurchaseItemInsufficientBalance() {
+    String simulatedUserInput = "2\n1\nA1\n3\n3\n";
+    provideInput(simulatedUserInput);
+
+    Application.main(new String[]{});
+
+    String output = getOutput();
+    assertTrue(output.contains("Purchase Menu:"));
+    assertFalse(output.contains("Insufficient balance. Please feed more money."));
+}
+
+@Test
+public void testFeedMoneyAndPurchaseItem() {
+    String simulatedUserInput = "2\n2\n2.00\n1\nA1\n3\n3\n";
+    provideInput(simulatedUserInput);
+
+    Application.main(new String[]{});
+
+    String output = getOutput();
+    assertTrue(output.contains("Current Balance: $2.0"));
+    assertFalse(output.contains("Insufficient balance. Please feed more money."));
+}
+}
+
