@@ -49,12 +49,14 @@ public void testDisplayItems() {
     provideInput(simulatedUserInput);
 
     Application.main(new String[]{});
+
     String output = getOutput();
     assertTrue(output.contains("Select an option: "));
     assertTrue(output.contains("A1 | Potato Crisps | $3.05 | 5"));
-    assertTrue(output.contains("B4 | Crunchie | $1.75 | 5"));
-    assertTrue(output.contains("C4 | Heavy | $1.5 | 5"));
-    assertTrue(output.contains("D2 | Little League Chew | $0.95 | 5"));
+    assertTrue(output.contains("B1 | Moonpie | $1.8 | 5"));
+    assertTrue(output.contains("C1 | Cola | $1.25 | 5"));
+    assertTrue(output.contains("D1 | Gum | $0.75 | 5"));
+    assertFalse(output.contains("Products sold out."));
 }
 
 @Test
