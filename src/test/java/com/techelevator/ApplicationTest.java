@@ -43,21 +43,21 @@ public void testApplicationMenu() {
     assertTrue(output.contains("Exiting. Have a nice day!"));
 }
 
-@Test
-public void testDisplayItems() {
-    String simulatedUserInput = "1\n3\n";
-    provideInput(simulatedUserInput);
+    @Test
+    public void testDisplayItems() {
+        String simulatedUserInput = "1\n3\n";
+        provideInput(simulatedUserInput);
 
-    Application.main(new String[]{});
+        Application.main(new String[]{});
 
-    String output = getOutput();
-    assertTrue(output.contains("Select an option: "));
-    assertTrue(output.contains("A1 | Potato Crisps | $3.05 | 5"));
-    assertTrue(output.contains("B1 | Moonpie | $1.8 | 5"));
-    assertTrue(output.contains("C1 | Cola | $1.25 | 5"));
-    assertTrue(output.contains("D1 | Gum | $0.75 | 5"));
-    assertFalse(output.contains("Products sold out."));
-}
+        String output = getOutput();
+        assertTrue(output.contains("Select an option: "));
+        assertTrue(output.contains("A1 | Potato Crisps | $3.05 | 5"));
+        assertTrue(output.contains("C3 | Mountain Melter | $1.5 | 5"));
+        assertTrue(output.contains("B4 | Crunchie | $1.75 | 5"));
+        assertTrue(output.contains("C3 | Mountain Melter | $1.5 | 5"));
+        assertFalse(output.contains("Products sold out."));
+    }
 
 @Test
 public void testPurchaseItemInsufficientBalance() {
